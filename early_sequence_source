@@ -1,0 +1,168 @@
+
+
+# creating a dataframe using pandas and reading the data on csv file
+# data = pandas.read_csv("coast_data.csv", low_memory=False)
+# # extracting the Velocity column into a series
+# speed_list = data.velocity
+#
+# print(data.columns)
+
+# # Using the speed conditions function in order to extract velocity at coast
+# v_array = speed_conditions(speed_list, 135, 55)
+# print(v_array)
+# # Creating a loop in order to iterate through dataframe and extract the rows that match with the v array.
+# i = 0
+# time_stamp_list = []
+# while i < len(speed_list):
+#
+#     if speed_list[i] in v_array:
+#         z = data.iloc[i]
+#         time_stamp_list.append(z)
+#     i += 1
+# single_t = time_stamp_list[0].time
+# test_list = []
+# for item in time_stamp_list:
+#     test_list.append(item.time)
+
+
+
+# df = pandas.DataFrame(test_list)
+# df.to_csv("SEE_huh.csv")
+
+# print(type(single_t))
+# j = float(z.time)
+# print(j)
+#
+# xx = str(j)
+#
+# print(xx[:2])
+
+# speed_list.keys()
+# yyy = data.iloc[197]
+# print(yyy.time)
+
+# i = 0
+# j = 1
+#
+# while j < len(speed_list):
+#     if speed_list[j] > speed_list[i]:
+#         print("increasing")
+#     elif speed_list[j] < speed_list[i]:
+#         print("decreasing")
+#
+#     i += 1
+#     j += 1
+
+
+# x = []
+# emp = {}
+#
+#
+# for index, value in speed_list.items():
+#     emp.update({index: value})
+#     x.append(emp)
+#
+# print(x)
+
+
+
+def speed_conditions(some_list, high_end_speed, low_end_speed):
+    empty_list = []
+    i = 0
+    j = 1
+    while j < len(some_list):
+        if some_list[j] < some_list[i] and some_list[j] < high_end_speed <= some_list[i]:
+            empty_list.append(some_list[j])
+        elif some_list[j] < some_list[i] and some_list[j] < low_end_speed <= some_list[i]:
+            empty_list.append(some_list[j])
+        i += 1
+        j += 1
+    return empty_list
+
+
+nums = ["112341", "80546", "221748", "21538"]
+nums_az = []
+time_constant = 7
+i = 0
+j = 1
+# conv_hour_e = 0
+while i < len(nums):
+    if len(nums[i]) > 5:
+        hour = str(nums[i][0:2])
+        conv_hour = int(hour) - time_constant
+        new_az = str(conv_hour) + nums[i][2::]
+        nums_az.append(new_az)
+
+    else:
+        e_hour = str(nums[i][0:1])
+        if int(e_hour) < 7:
+            conv_hour_e = int(e_hour) + 17
+            new_az_e = str(conv_hour_e) + nums[i][1::]
+            nums_az.append(new_az_e)
+        elif int(e_hour) >= 7:
+            conv_hour_e = int(e_hour) - time_constant
+            new_az_e = str(conv_hour_e) + nums[i][1::]
+            nums_az.append(new_az_e)
+    i += 1
+
+print(nums_az)
+
+
+
+import pandas as pd
+
+string_num_list = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
+
+w_data = pd.read_csv("track_weather.csv")
+
+test_list = w_data.Time[1:5]
+new_list = []
+
+print(test_list)
+
+i = 1
+while i <= len(test_list):
+    j = 0
+    new_string = ""
+    while j < len(test_list[i]):
+        if test_list[i][j] in string_num_list:
+            new_string += test_list[i][j]
+        j += 1
+
+    new_list.append(new_string)
+    i += 1
+
+print(new_list)
+
+# i = 0
+# stopping = len(vbox_times) - 1
+# ending = len(weather_str_list) - 1
+#
+# # looping through the lists in order to determine if time signature occurs during coast
+# # loop with embedded true condition print statements
+# while i <= ending:
+#     k = 0
+#     j = 1
+#     if vbox_times[k] <= weather_str_list[i] <= vbox_times[j]:
+#         print(weather_str_list[i], True)
+#         i = i + 1
+#         continue
+#     elif i == ending:
+#         break
+#     else:
+#         l = 3
+#         n = 2
+#         m = 2
+#         while n < stopping:
+#             if weather_str_list[i] == weather_str_list[-1]:
+#                 print(weather_str_list[i], True)
+#                 break
+#             elif vbox_times[m] <= weather_str_list[i] <= vbox_times[l]:
+#                 print(weather_str_list[i], True)
+#                 i = i + 1
+#                 continue
+#             else:
+#                 m = m + 2
+#                 l = l + 2
+#                 n = n + 2
+#     i = i + 1
