@@ -28,13 +28,25 @@ HIGH_E_SPEED = 55
 
 LOW_B_SPEED = 85
 LOW_E_SPEED = 15
-
+HIGH_B_SPEED = 0
+test_type = input("For WLTP test press 'w', for NEDC test press 'n': \n").lower()
+if test_type == 'w':
+    HIGH_B_SPEED = WLTP_HIGH_B_SPEED
+elif test_type == 'n':
+    HIGH_B_SPEED = NEDC_HIGH_B_SPEED
 test_runs = input("Was this test done with Split Runs? Type 'y' for YES, Type 'n' for NO:  \n").lower()
+
+
 coast_down_processor_on = True
+
+
+
+
 while coast_down_processor_on:
+
     if test_runs == "y":
         vbox_high = Vbox()
-        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=WLTP_HIGH_B_SPEED)
+        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=HIGH_B_SPEED)
         h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=HIGH_E_SPEED)
         sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
         filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
