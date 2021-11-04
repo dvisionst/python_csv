@@ -77,7 +77,7 @@ while coast_down_processor_on:
     elif test_runs == "n":
         vbox_high = Vbox()
         h_pair_start_array = vbox_high.start_trig_times(high_end_speed=WLTP_HIGH_B_SPEED)
-        h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=HIGH_E_SPEED)
+        h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=LOW_E_SPEED)
         sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
         filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
 
