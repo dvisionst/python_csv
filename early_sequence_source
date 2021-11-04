@@ -166,3 +166,31 @@ print(new_list)
 #                 l = l + 2
 #                 n = n + 2
 #     i = i + 1
+
+
+# i = 0
+# while i < len(full_coast_weather_index):
+#     x = main_weather_track.track_data.iloc[full_coast_weather_index[i]]
+#     final_list.append(x)
+#     i += 1
+#
+# print(final_list)
+#
+#
+# These are the Split Times blocks of code
+
+vbox_high = Vbox()
+h_pair_start_array = vbox_high.start_trig_times(high_end_speed=WLTP_HIGH_B_SPEED)
+h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=WLTP_HIGH_E_SPEED)
+sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
+filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
+
+vbox_low = Vbox()
+l_pair_start_array = vbox_low.start_trig_times(high_end_speed=WLTP_LOW_B_SPEED)
+l_pair_end_array = vbox_low.stop_trig_times(low_end_speed=WLTP_LOW_E_SPEED)
+sorted_low_list = cd.total_index_sort(start_list=l_pair_start_array, stop_list=l_pair_end_array)
+filtered_l_pair_indices = pair_list_filter(vbox_low, sorted_low_list)
+
+filtered_h_pair_indices.extend(filtered_l_pair_indices)
+filtered_h_pair_indices.sort()
+all_runs_indices = filtered_h_pair_indices

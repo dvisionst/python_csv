@@ -10,7 +10,6 @@ class UtcTime:
         self.az_times = []
 
     def utc_type_conv(self, vbox_list):
-
         for value in vbox_list:
             self.round_t.append(round(value))
         for num_time in self.round_t:

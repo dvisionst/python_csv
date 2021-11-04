@@ -2,7 +2,6 @@ STRING_NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 
 def formatting_t(some_list):
-
     new_list = []
     i = 1
     while i <= len(some_list):
@@ -18,36 +17,48 @@ def formatting_t(some_list):
     return new_list
 
 
+def time_to_integers(list_of_times):
+    int_times = []
+    for item in list_of_times:
+        int_times.append(int(item))
+    return int_times
 
-# i = 0
-# stopping = len(vbox_times) - 1
-# ending = len(weather_str_list) - 1
-#
-# # looping through the lists in order to determine if time signature occurs during coast
-# # loop with embedded true condition print statements
-# while i <= ending:
-#     k = 0
-#     j = 1
-#     if vbox_times[k] <= weather_str_list[i] <= vbox_times[j]:
-#         print(weather_str_list[i], True)
-#         i = i + 1
-#         continue
-#     elif i == ending:
-#         break
-#     else:
-#         l = 3
-#         n = 2
-#         m = 2
-#         while n < stopping:
-#             if weather_str_list[i] == weather_str_list[-1]:
-#                 print(weather_str_list[i], True)
-#                 break
-#             elif vbox_times[m] <= weather_str_list[i] <= vbox_times[l]:
-#                 print(weather_str_list[i], True)
-#                 i = i + 1
-#                 continue
-#             else:
-#                 m = m + 2
-#                 l = l + 2
-#                 n = n + 2
-#     i = i + 1
+
+def total_index_sort(start_list, stop_list):
+    start_list.extend(stop_list)
+    start_list.sort()
+    return start_list
+
+
+def weather_during_coast_full(list_of_weather_t, list_of_time_stamps):
+    i = 0
+    stopping = len(list_of_time_stamps) - 1
+    ending = len(list_of_weather_t) - 1
+    index_list = []
+    while i <= ending:
+        k = 0
+        j = 1
+        if list_of_time_stamps[k] <= list_of_weather_t[i] <= list_of_time_stamps[j]:
+            i += 1
+            index_list.append(i)
+            continue
+        elif i == ending:
+            break
+        else:
+            p = 3
+            n = 2
+            m = 2
+            while n < stopping:
+                if list_of_weather_t[i] == list_of_weather_t[-1]:
+                    print(list_of_weather_t[i], True)
+                    break
+                elif list_of_time_stamps[m] <= list_of_weather_t[i] <= list_of_time_stamps[p]:
+                    i += 1
+                    index_list.append(i)
+                    continue
+                else:
+                    m += 2
+                    p += 2
+                    n += 2
+        i += 1
+    return index_list
