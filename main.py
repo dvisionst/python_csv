@@ -129,10 +129,10 @@ while coast_down_processor_on:
 
 
 
-# data = pd.read_csv("vbox_results_all_runs2.csv")
-#
-# print(data.Heading)
-# print(type(data.iloc[0].Heading))
+data = pd.read_csv("vbox_results_all_runs2.csv")
+
+print(data.Heading)
+print(type(data.iloc[0].Heading))
 results = Results()
 results.high_run_pull()
 results.low_run_pull()
