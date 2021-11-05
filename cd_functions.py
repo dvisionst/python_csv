@@ -64,9 +64,4 @@ def weather_during_coast_full(list_of_weather_t, list_of_time_stamps):
     return index_list
 
 
-def updating_pairs(odd_list, index):
-    empty = []
-    for item in odd_list:
-        empty.append(item)
-    empty.pop(index)
-    return empty
+
