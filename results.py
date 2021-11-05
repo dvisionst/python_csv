@@ -1,16 +1,14 @@
 import pandas as pd
-
-pair_number = range(1, 12)
-pair_letter = ('a', 'b')
+import cd_functions as cd
 
 
 class Results:
 
     def __init__(self):
-        self.data = pd.read_csv("vbox_results_all_runs2.csv")
+        self.data = pd.read_csv("vbox_results_runs.csv")
         self.high_index = []
         self.low_index = []
-        self.good_pairs_i = []
+        self.all_s_gate_t = []
         self.high_dict = {
             "high": [
                 '135 - 125 (s)',
@@ -34,6 +32,16 @@ class Results:
                 '25 - 15 (s)'
             ]
         }
+        self.loop_count = 0
+        self.p_values_out = []
+        self.high_sum = 0
+        self.overlap_values = []
+        self.low_sum = 0
+        self.columns = {}
+
+    def loop_index(self):
+        self.loop_count = len(self.high_index)/2
+        return self.loop_count
 
     def high_run_pull(self):
         i = 0
@@ -51,40 +59,88 @@ class Results:
             i += 1
         return self.low_index
 
-    def tuple_creation_ideal(self):
+    def output_pairs_list(self):
+        for item in range(0, int(self.loop_count) * 2):
+            new_blank = []
+            self.p_values_out.append(new_blank)
+        return self.p_values_out
+
+    def top_vel_accume(self):
         i = 0
-        if len(self.high_index) == len(self.low_index):
-            while i < len(self.low_index):
-                norm_high = self.high_index[i]
-                norm_low = self.low_index[i]
-                if self.data.iloc[norm_high].Heading == self.data.iloc[norm_low].Heading:
-                    self.good_pairs_i.append(norm_high)
-                    self.good_pairs_i.append(norm_low)
-                i += 1
-            return self.good_pairs_i
-        elif len(self.high_index) != len(self.low_index):
-            return False
 
-    def odd_run_fix(self):
+        while i < self.loop_count * 2:
+            self.p_values_out[i].append(0)
+            total = 0
+            k = 0
+            while k < 5:
+
+                self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
+                total += self.high_sum
+                self.p_values_out[i].append(total)
+                k += 1
+            i += 1
+        return self.p_values_out
+
+    def transition_value(self):
         i = 0
-        k = 1
-        if len(self.high_index) % 2 != 0:
-            while k < len(self.high_index):
-                if self.data.iloc[self.high_index[i]].Heading != self.data.iloc[self.high_index[k]].Heading:
-                    i += 1
-                    k += 1
-                elif self.data.iloc[self.high_index[i]].Heading == self.data.iloc[self.high_index[k]].Heading:
-                    return self.high_index, k, 10
-
-        elif len(self.low_index) % 2 != 0:
-            while k < len(self.low_index):
-                if self.data.iloc[self.low_index[i]].Heading != self.data.iloc[self.low_index[k]].Heading:
-                    i += 1
-                    k += 1
-                elif self.data.iloc[self.low_index[i]].Heading == self.data.iloc[self.low_index[k]].Heading:
-                    return self.low_index, k, 0
+        self.overlap_values.clear()
+        while i < len(self.p_values_out):
+            last_sum = self.p_values_out[i][-1]
+            self.overlap_values.append(last_sum)
+            i += 1
+        return self.overlap_values
 
 
+    def mid_ave_accume(self):
+        i = 0
+        self.transition_value()
+        while i < self.loop_count * 2:
+            k = 5
+            j = 0
+            total = self.overlap_values[i]
+            while k < 8:
+                h_v = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
+                l_v = self.data.iloc[self.low_index[i]][self.low_dict["low"][j]]
+                overlap_average = (h_v + l_v)/2
+                total += overlap_average
+                self.p_values_out[i].append(total)
+
+                k += 1
+                j += 1
+            j += 1
+            i += 1
+        return self.p_values_out
+
+    def low_vel_accume(self):
+        i = 0
+        self.transition_value()
+        while i < self.loop_count * 2:
+            total = self.overlap_values[i]
+            k = 3
+            while k < 7:
+                self.low_sum = self.data.iloc[self.low_index[i]][self.low_dict["low"][k]]
+                total += self.low_sum
+                self.p_values_out[i].append(total)
+                k += 1
+            i += 1
+        return self.p_values_out
+
+    def final_dataframe(self):
+        pair_legs = range(1, int(self.loop_count) + 1)
+        i = 0
+        pairs_dict_keys = []
+        while i < len(pair_legs):
+            lead_p = str(pair_legs[i])
+            first_key = lead_p + 'a'
+            second_key = lead_p + 'b'
+            pairs_dict_keys.append(first_key)
+            pairs_dict_keys.append(second_key)
+            i += 1
+        j = 0
+        while j < len(self.p_values_out):
+            self.columns.update({pairs_dict_keys[j]: self.p_values_out[j]})
+            j += 1
+        return self.columns
 
 
 
