@@ -6,8 +6,6 @@ import cd_functions as cd
 import pandas as pd
 
 
-# Using file in FOA data V038/Data/Spec 1 - EU RLF-Low/Test9_04June
-
 def pair_list_filter(v_obj, asc_list_indexes):
     speed_pairs_f_list = []
     odd_even_check = 0
@@ -23,19 +21,23 @@ def pair_list_filter(v_obj, asc_list_indexes):
     return speed_pairs_f_list
 
 
-WLTP_HIGH_B_SPEED = 135
-NEDC_HIGH_B_SPEED = 125
 HIGH_E_SPEED = 55
-
 LOW_B_SPEED = 85
 LOW_E_SPEED = 15
 
 test_runs = input("Was this test done with Split Runs? Type 'y' for YES, Type 'n' for NO:  \n").lower()
 coast_down_processor_on = True
+test_type = input("For WLTP test press 'w', for NEDC press 'n': \n").lower()
+if test_type == 'w':
+    HIGH_B_SPEED = 135
+else:
+    HIGH_B_SPEED = 125
+
 while coast_down_processor_on:
+
     if test_runs == "y":
         vbox_high = Vbox()
-        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=WLTP_HIGH_B_SPEED)
+        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=HIGH_B_SPEED)
         h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=HIGH_E_SPEED)
         sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
         filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
@@ -69,15 +71,39 @@ while coast_down_processor_on:
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
-
         df = pd.DataFrame(final_list)
         df.update(new_df)
         df.to_csv("weather_during_coast.csv")
+
+        results = Results()
+        if test_type == 'w':
+            results.high_run_pull(test_type=True)
+            results.low_run_pull()
+            results.loop_index()
+            results.output_pairs_list()
+            results.top_vel_accume()
+            results.mid_ave_accume()
+            results.low_vel_accume()
+            results.final_dataframe()
+            df = pd.DataFrame(results.columns)
+            df.to_csv("cumulative_times_results.csv")
+        elif test_type != "w":
+            results.high_run_pull(test_type=False)
+            results.low_run_pull()
+            results.loop_index()
+            results.output_pairs_list()
+            results.top_vel_accume()
+            results.mid_ave_accume()
+            results.low_vel_accume()
+            results.final_dataframe()
+            df = pd.DataFrame(results.columns)
+            df.to_csv("cumulative_times_results.csv")
+
         coast_down_processor_on = False
 
     elif test_runs == "n":
         vbox_high = Vbox()
-        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=WLTP_HIGH_B_SPEED)
+        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=HIGH_B_SPEED)
         h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=LOW_E_SPEED)
         sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
         filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
@@ -103,10 +129,28 @@ while coast_down_processor_on:
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
-
         df = pd.DataFrame(final_list)
         df.update(new_df)
         df.to_csv("weather_during_coast.csv")
+
+        results = Results()
+        if test_type == 'w':
+            results.high_run_pull(test_type=True)
+            results.loop_index()
+            results.output_pairs_list()
+            results.top_vel_single(test_type=True)
+            results.final_dataframe()
+            df = pd.DataFrame(results.columns)
+            df.to_csv("cumulative_times_results.csv")
+        elif test_type != "w":
+            results.high_run_pull(test_type=False)
+            results.loop_index()
+            results.output_pairs_list()
+            results.top_vel_single(test_type=False)
+            results.final_dataframe()
+            df = pd.DataFrame(results.columns)
+            df.to_csv("cumulative_times_results.csv")
+
         coast_down_processor_on = False
 
     else:
@@ -117,16 +161,14 @@ while coast_down_processor_on:
             print("You have terminated the Coastdown Processor.")
             coast_down_processor_on = False
 
-data = pd.read_csv("vbox_results_runs.csv")
+weather = Weather()
+weather.track_w_list_con()
+weather.coast_w_list_con()
+weather.filtered_straight()
+track_weather = weather.new_straight_column()
+data1 = pd.read_csv("weather_during_coast.csv")
+data1.insert(loc=11, column="Straightaway", value=track_weather)
+data1.to_csv("weather_during_coast.csv")
 
-results = Results()
-results.high_run_pull()
-results.low_run_pull()
-amount_of_pairs = results.loop_index()
-results.output_pairs_list()
-results.top_vel_accume()
-results.mid_ave_accume()
-results.low_vel_accume()
-results.final_dataframe()
-df = pd.DataFrame(results.columns)
-df.to_csv("cumulative_times_results.csv")
+print("The program has completed, you can now view the results in two csv files\n")
+print("Those files are: 'weather_during_coast' & 'cumulative_times_results'\n")
