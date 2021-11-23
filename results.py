@@ -63,7 +63,7 @@ class Results:
 
     def high_run_pull(self, test_type):
         i = 0
-        if test_type == True:
+        if test_type:
             t = 0
         else:
             t = 1
@@ -88,13 +88,16 @@ class Results:
             self.p_values_out.append(new_blank)
         return self.p_values_out
 
-    def top_vel_accume(self):
+    def top_vel_accume(self, t_type):
         i = 0
 
         while i < self.loop_count * 2:
             self.p_values_out[i].append(0)
             total = 0
-            k = 0
+            if t_type:
+                k = 0
+            else:
+                k = 1
             while k < 5:
 
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
@@ -183,7 +186,6 @@ class Results:
             self.columns.update({pairs_dict_keys[j]: self.p_values_out[j]})
             j += 1
         return self.columns
-
 
 
 
