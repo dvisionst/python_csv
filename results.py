@@ -1,6 +1,7 @@
 import pandas as pd
 import cd_functions as cd
-
+pair_number = range(1, 12)
+pair_letter = ('a', 'b')
 
 class Results:
 
@@ -32,6 +33,23 @@ class Results:
                 '25 - 15 (s)'
             ]
         }
+        self.single_dict = {
+            "high": [
+                '135 - 125 (s)',
+                '125 - 115 (s)',
+                '115 - 105 (s)',
+                '105 - 95 (s)',
+                '95 - 85 (s)',
+                '85 - 75 (s)',
+                '75 - 65 (s)',
+                '65 - 55 (s)',
+                '55 - 45 (s)',
+                '45 - 35 (s)',
+                '35 - 25 (s)',
+                '25 - 15 (s)'
+
+            ]
+        }
         self.loop_count = 0
         self.p_values_out = []
         self.high_sum = 0
@@ -43,10 +61,15 @@ class Results:
         self.loop_count = len(self.high_index)/2
         return self.loop_count
 
-    def high_run_pull(self):
+    def high_run_pull(self, test_type):
         i = 0
+        if test_type == True:
+            t = 0
+        else:
+            t = 1
         while i < len(self.data.Run):
-            if self.data.iloc[i][self.high_dict['high'][0]] > 0:
+
+            if self.data.iloc[i][self.high_dict['high'][t]] > 0:
                 self.high_index.append(i)
             i += 1
         return self.high_index
@@ -120,6 +143,25 @@ class Results:
             while k < 7:
                 self.low_sum = self.data.iloc[self.low_index[i]][self.low_dict["low"][k]]
                 total += self.low_sum
+                self.p_values_out[i].append(total)
+                k += 1
+            i += 1
+        return self.p_values_out
+
+    def top_vel_single(self, test_type):
+        i = 0
+        while i < self.loop_count * 2:
+            self.p_values_out[i].append(0)
+            total = 0
+            if test_type == True:
+                k = 0
+                stop = 13
+            else:
+                k = 1
+                stop = 12
+            while k < stop:
+                self.high_sum = self.data.iloc[self.high_index[i]][self.single_dict["high"][k]]
+                total += self.high_sum
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
