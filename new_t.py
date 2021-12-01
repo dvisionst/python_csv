@@ -1,48 +1,71 @@
 import pandas as pd
 import math
-data = pd.read_csv("weather_during_coast.csv")
+
+FIVE_LIMIT = 5
+TWO_LIMIT = 2
+CROSS_LIMIT = 2
 
 
-def five_rolling_ave_wspd(list_values, variable):
-    one = list_values[variable - 4]
-    two = list_values[variable - 3]
-    three = list_values[variable - 2]
-    four = list_values[variable - 1]
-    five = list_values[variable]
-    five_ave = (one + two + three + four + five)/5
-    return round(five_ave, 2)
+class Wcheck:
+
+    def __init__(self):
+        self.data = pd.read_csv("weather_during_coast.csv")
+        self.five_r_ave = [0, 0, 0, 0]
+        self.two_r_ave = [0]
+        self.cross_wind = [0, 0, 0, 0]
+        self.wind_speed = []
+        self.wind_direction = []
+
+    def wind_speed_array(self):
+        for item in self.data.WSPD_MAX:
+            self.wind_speed.append(item)
+        return self.wind_speed
+
+    def wind_dir_array(self):
+        for item in self.data.WNDDIR:
+            self.wind_direction.append(item)
+        return self.wind_direction
+
+    def two_ave(self):
+        i = 1
+        while i < len(self.wind_speed):
+            one = self.wind_speed[i - 1]
+            two = self.wind_speed[i]
+            two_ave = (one + two) / 2
+            average = round(two_ave, 2)
+            self.two_r_ave.append(average)
+            i += 1
+        return self.two_r_ave
+
+    def five_ave(self):
+        i = 4
+        while i < len(self.wind_speed):
+            one = self.wind_speed[i - 4]
+            two = self.wind_speed[i - 3]
+            three = self.wind_speed[i - 2]
+            four = self.wind_speed[i - 1]
+            five = self.wind_speed[i]
+            ave = (one + two + three + four + five) / 5
+            average = round(ave, 2)
+            self.five_r_ave.append(average)
+            i += 1
+        return self.five_r_ave
+
+    def cross_wind(self):
+        i = 4
+        angle = 41.68
+        while i < len(self.five_r_ave):
+            x = self.wind_direction[i]
+            y = self.five_r_ave[i]
+            z = math.sin(math.radians(x - angle)) * y
+            final = round(math.sqrt(z ** 2), 2)
+            self.cross_wind.append(final)
+            i += 1
+        return self.cross_wind
+
+    def pass_fail(self):
+        i = 0
 
 
-def cross_check(ave_w_list, w_dir_list):
-    i = 0
-    j = 4
-    angle = 41.68
-    x_cross = []
-    while i < len(ave_w_list) or j < len(w_dir_list):
-        x = w_dir_list[j]
-        y = ave_w_list[i]
-        z = math.sin(math.radians(x - angle))*y
-        final = round(math.sqrt(z**2), 2)
-        x_cross.append(final)
-        i += 1
-        j += 1
-    return x_cross
 
-wind_speed = []
 
-for item in data.WSPD_MAX:
-    wind_speed.append(item)
-# WNDDIR
-i = 4
-five_sec_wspd = []
-while i < len(wind_speed):
-    avee = five_rolling_ave_wspd(wind_speed, i)
-    five_sec_wspd.append(avee)
-    i += 1
-
-emp = []
-for item in data.WNDDIR:
-    emp.append(item)
-
-xxx = cross_check(five_sec_wspd, emp)
-print(xxx)
