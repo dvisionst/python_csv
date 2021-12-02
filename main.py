@@ -2,9 +2,12 @@ from vbox import Vbox
 from utc_time import UtcTime
 from weather import Weather
 from results import Results
+from wcheck import Wcheck
 import cd_functions as cd
 import pandas as pd
 
+
+# Using file in FOA data V038/Data/Spec 1 - EU RLF-Low/Test9_04June
 
 def pair_list_filter(v_obj, asc_list_indexes):
     speed_pairs_f_list = []
@@ -53,6 +56,7 @@ while coast_down_processor_on:
         all_runs_indices = filtered_h_pair_indices
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
 
+
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -71,6 +75,7 @@ while coast_down_processor_on:
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
+
         df = pd.DataFrame(final_list)
         df.update(new_df)
         df.to_csv("weather_during_coast.csv")
@@ -81,9 +86,10 @@ while coast_down_processor_on:
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume(t_type=True)
+            results.top_vel_accume()
             results.mid_ave_accume()
             results.low_vel_accume()
+            results.add_leg_stamps(coast_times_str)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
             df.to_csv("cumulative_times_results.csv")
@@ -92,7 +98,7 @@ while coast_down_processor_on:
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume(t_type=False)
+            results.top_vel_accume()
             results.mid_ave_accume()
             results.low_vel_accume()
             results.final_dataframe()
@@ -129,6 +135,7 @@ while coast_down_processor_on:
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
+
         df = pd.DataFrame(final_list)
         df.update(new_df)
         df.to_csv("weather_during_coast.csv")
@@ -166,9 +173,24 @@ weather.track_w_list_con()
 weather.coast_w_list_con()
 weather.filtered_straight()
 track_weather = weather.new_straight_column()
+
+new_straightaway_column = {"STRAIGHT": track_weather}
+t_df = pd.DataFrame(new_straightaway_column)
 data1 = pd.read_csv("weather_during_coast.csv")
 data1.insert(loc=11, column="Straightaway", value=track_weather)
 data1.to_csv("weather_during_coast.csv")
+
+wc = Wcheck()
+wc.wind()
+wc.two_ave()
+wc.five_ave()
+wc.cross_w()
+failure = wc.pass_fail()
+
+if failure != []:
+    df = pd.DataFrame(failure)
+    df.to_csv("weather_failures.csv")
+    print("The Coastdown test fails due to weather, for more information open up 'weather_failures.csv' file.")
 
 print("The program has completed, you can now view the results in two csv files\n")
 print("Those files are: 'weather_during_coast' & 'cumulative_times_results'\n")
