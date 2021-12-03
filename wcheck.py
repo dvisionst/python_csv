@@ -1,10 +1,6 @@
 import pandas as pd
 import math
 
-FIVE_LIMIT = 5
-TWO_LIMIT = 2
-CROSS_LIMIT = 2
-
 
 class Wcheck:
 
