@@ -60,12 +60,14 @@ class Wcheck:
         return self.cross_wind
 
     def pass_fail(self):
+        good_weather = 0
         i = 1
         max_2r_wind_fail = []
         while i < len(self.two_r_ave):
             if self.two_r_ave[i] > 8:
                 time_stamp = self.time[i]
                 max_2r_wind_fail.append(time_stamp)
+                good_weather += 1
                 i += 1
             else:
                 i += 1
@@ -78,6 +80,7 @@ class Wcheck:
             if self.five_r_ave[j] > 5:
                 t_stamp = self.time[j]
                 max_5r_wind_fail.append(t_stamp)
+                good_weather += 1
                 j += 1
             else:
                 j += 1
@@ -90,18 +93,33 @@ class Wcheck:
             if self.cross_wind[k] > 2:
                 time = self.time[k]
                 cross_wind_fail.append(time)
+                good_weather += 1
                 k += 1
             else:
                 k += 1
         cross_fail = {"cross wind fail": cross_wind_fail}
+
         self.fail.append(cross_fail)
 
-        starting_temp = self.temp[0]
-        ending_temp = self.temp[-1]
+        starting_temp = min(self.temp)
+        ending_temp = max(self.temp)
         temp_difference = abs(ending_temp - starting_temp)
         if temp_difference > 5:
             temp_difference_fail = "temperature failure due to difference more than 5 degrees"
             self.fail.append(temp_difference_fail)
+            good_weather += 1
+
+        if cross_wind_fail == []:
+            good_weather += 0
+        if max_2r_wind_fail == []:
+            good_weather += 0
+        if max_5r_wind_fail == []:
+            good_weather += 0
+
+        if good_weather == 0:
+            self.fail.clear()
+            self.fail = []
+
         return self.fail
 
 
