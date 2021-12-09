@@ -1,7 +1,9 @@
 import pandas as pd
 import cd_functions as cd
+
 pair_number = range(1, 12)
 pair_letter = ('a', 'b')
+
 
 class Results:
 
@@ -56,9 +58,11 @@ class Results:
         self.overlap_values = []
         self.low_sum = 0
         self.columns = {}
+        self.pair_stamp_a = []
+        self.pair_stamp_b = []
 
     def loop_index(self):
-        self.loop_count = len(self.high_index)/2
+        self.loop_count = len(self.high_index) / 2
         return self.loop_count
 
     def high_run_pull(self, test_type):
@@ -88,18 +92,13 @@ class Results:
             self.p_values_out.append(new_blank)
         return self.p_values_out
 
-    def top_vel_accume(self, t_type):
+    def top_vel_accume(self):
         i = 0
-
         while i < self.loop_count * 2:
             self.p_values_out[i].append(0)
             total = 0
-            if t_type:
-                k = 0
-            else:
-                k = 1
+            k = 0
             while k < 5:
-
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
                 total += self.high_sum
                 self.p_values_out[i].append(total)
@@ -116,7 +115,6 @@ class Results:
             i += 1
         return self.overlap_values
 
-
     def mid_ave_accume(self):
         i = 0
         self.transition_value()
@@ -127,7 +125,7 @@ class Results:
             while k < 8:
                 h_v = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
                 l_v = self.data.iloc[self.low_index[i]][self.low_dict["low"][j]]
-                overlap_average = (h_v + l_v)/2
+                overlap_average = (h_v + l_v) / 2
                 total += overlap_average
                 self.p_values_out[i].append(total)
 
@@ -156,7 +154,7 @@ class Results:
         while i < self.loop_count * 2:
             self.p_values_out[i].append(0)
             total = 0
-            if test_type == True:
+            if test_type:
                 k = 0
                 stop = 13
             else:
@@ -165,6 +163,74 @@ class Results:
             while k < stop:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.single_dict["high"][k]]
                 total += self.high_sum
+                self.p_values_out[i].append(total)
+                k += 1
+            i += 1
+        return self.p_values_out
+
+    def separator(self):
+        m = 0
+        while m < 2:
+            n = 0
+            while n < len(self.p_values_out):
+                self.p_values_out[n].append(" ")
+                n += 1
+            m += 1
+
+    def add_leg_stamps(self, time_list):
+        self.separator()
+        i = 0
+        while i < len(time_list):
+            self.pair_stamp_a.append(time_list[i])
+            self.pair_stamp_a.append(time_list[i + 1])
+            i += 4
+        j = 2
+        while j < len(time_list):
+            self.pair_stamp_b.append(time_list[j])
+            self.pair_stamp_b.append(time_list[j + 1])
+            j += 4
+        i = 0
+        k = 1
+        while k < len(self.p_values_out):
+            self.p_values_out[i].append(self.pair_stamp_a[i])
+            self.p_values_out[i].append(self.pair_stamp_a[i + 1])
+            self.p_values_out[i].append(self.pair_stamp_a[i + 2])
+            self.p_values_out[i].append(self.pair_stamp_a[i + 3])
+            self.p_values_out[k].append(self.pair_stamp_b[i])
+            self.p_values_out[k].append(self.pair_stamp_b[i + 1])
+            self.p_values_out[k].append(self.pair_stamp_b[i + 2])
+            self.p_values_out[k].append(self.pair_stamp_b[i + 3])
+            i += 2
+            k += 2
+
+        self.separator()
+        return self.p_values_out
+
+    def w_run_analysis(self):
+        self.high_sum = []
+        self.low_sum = []
+        i = 0
+        while i < self.loop_count * 2:
+            self.p_values_out[i].append(0)
+            total = 0
+            k = 0
+            while k < 8:
+                self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
+                total += self.high_sum
+                self.p_values_out[i].append(total)
+                k += 1
+            i += 1
+
+        self.separator()
+
+        i = 0
+        while i < self.loop_count * 2:
+            self.p_values_out[i].append(0)
+            total = 0
+            k = 0
+            while k < 7:
+                self.low_sum = self.data.iloc[self.low_index[i]][self.low_dict["low"][k]]
+                total += self.low_sum
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
@@ -186,16 +252,3 @@ class Results:
             self.columns.update({pairs_dict_keys[j]: self.p_values_out[j]})
             j += 1
         return self.columns
-
-
-
-
-
-
-
-
-
-
-
-
-
