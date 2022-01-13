@@ -179,28 +179,54 @@ class Results:
 
     def add_leg_stamps(self, time_list):
         self.separator()
-        i = 0
-        while i < len(time_list):
-            self.pair_stamp_a.append(time_list[i])
-            self.pair_stamp_a.append(time_list[i + 1])
-            i += 4
-        j = 2
+        j = 0
+        new_list = []
         while j < len(time_list):
-            self.pair_stamp_b.append(time_list[j])
-            self.pair_stamp_b.append(time_list[j + 1])
-            j += 4
+            k = 0
+            str_con = ""
+            while k < len(time_list[j]):
+                if len(time_list[j]) < 6:
+                    if k == 1 or k == 3:
+                        str_con += ":" + time_list[j][k]
+                    else:
+                        str_con += time_list[j][k]
+                    k += 1
+
+                else:
+                    if k == 2 or k == 4:
+                        str_con += ":" + time_list[j][k]
+                    else:
+                        str_con += time_list[j][k]
+                    k += 1
+            new_list.append(str_con)
+            j += 1
         i = 0
-        k = 1
-        while k < len(self.p_values_out):
-            self.p_values_out[i].append(self.pair_stamp_a[i])
-            self.p_values_out[i].append(self.pair_stamp_a[i + 1])
-            self.p_values_out[i].append(self.pair_stamp_a[i + 2])
-            self.p_values_out[i].append(self.pair_stamp_a[i + 3])
-            self.p_values_out[k].append(self.pair_stamp_b[i])
-            self.p_values_out[k].append(self.pair_stamp_b[i + 1])
-            self.p_values_out[k].append(self.pair_stamp_b[i + 2])
-            self.p_values_out[k].append(self.pair_stamp_b[i + 3])
-            i += 2
+        while i < len(new_list):
+            self.pair_stamp_a.append(new_list[i])
+            self.pair_stamp_a.append(new_list[i + 1])
+            self.pair_stamp_a.append(new_list[i + 2])
+            self.pair_stamp_a.append(new_list[i + 3])
+            i += 8
+
+        j = 4
+        while j < len(new_list):
+
+            self.pair_stamp_b.append(new_list[j])
+            self.pair_stamp_b.append(new_list[j + 1])
+            self.pair_stamp_b.append(new_list[j + 2])
+            self.pair_stamp_b.append(new_list[j + 3])
+
+            j += 8
+        i = 0
+        k = 0
+
+        while i < len(self.p_values_out):
+            self.p_values_out[i].append(self.pair_stamp_a[k])
+            self.p_values_out[i].append(self.pair_stamp_a[k + 1])
+            self.p_values_out[i].append(self.pair_stamp_b[k])
+            self.p_values_out[i].append(self.pair_stamp_b[k + 1])
+
+            i += 1
             k += 2
 
         self.separator()
@@ -216,7 +242,7 @@ class Results:
             k = 0
             while k < 8:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
-                total += self.high_sum
+                total = self.high_sum
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
@@ -230,7 +256,7 @@ class Results:
             k = 0
             while k < 7:
                 self.low_sum = self.data.iloc[self.low_index[i]][self.low_dict["low"][k]]
-                total += self.low_sum
+                total = self.low_sum
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
