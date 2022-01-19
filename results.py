@@ -100,7 +100,7 @@ class Results:
             k = 0
             while k < 5:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
-                total += self.high_sum
+                total += round(self.high_sum, 3)
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
@@ -126,7 +126,7 @@ class Results:
                 h_v = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
                 l_v = self.data.iloc[self.low_index[i]][self.low_dict["low"][j]]
                 overlap_average = (h_v + l_v) / 2
-                total += overlap_average
+                total += round(overlap_average, 3)
                 self.p_values_out[i].append(total)
 
                 k += 1
@@ -143,7 +143,7 @@ class Results:
             k = 3
             while k < 7:
                 self.low_sum = self.data.iloc[self.low_index[i]][self.low_dict["low"][k]]
-                total += self.low_sum
+                total += round(self.low_sum, 3)
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
@@ -162,7 +162,7 @@ class Results:
                 stop = 12
             while k < stop:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.single_dict["high"][k]]
-                total += self.high_sum
+                total += round(self.high_sum, 3)
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
@@ -242,7 +242,7 @@ class Results:
             k = 0
             while k < 8:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
-                total = self.high_sum
+                total = round(self.high_sum, 3)
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
