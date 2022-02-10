@@ -7,17 +7,15 @@ import cd_functions as cd
 import pandas as pd
 
 
-# Using file in FOA data V038/Data/Spec 1 - EU RLF-Low/Test9_04June
-
 def pair_list_filter(v_obj, asc_list_indexes):
     speed_pairs_f_list = []
     odd_even_check = 0
     i = 0
     while i < len(asc_list_indexes):
-        if odd_even_check % 2 == 0 and v_obj.data.iloc[asc_list_indexes[i]].velocity > 75:
+        if odd_even_check % 2 == 0 and v_obj.data.iloc[asc_list_indexes[i]].velocity > 60:
             speed_pairs_f_list.append(asc_list_indexes[i])
             odd_even_check = 1
-        elif odd_even_check % 2 == 1 and v_obj.data.iloc[asc_list_indexes[i]].velocity < 75:
+        elif odd_even_check % 2 == 1 and v_obj.data.iloc[asc_list_indexes[i]].velocity < 60:
             speed_pairs_f_list.append(asc_list_indexes[i])
             odd_even_check = 0
         i += 1
@@ -25,16 +23,25 @@ def pair_list_filter(v_obj, asc_list_indexes):
 
 
 HIGH_E_SPEED = 55
-LOW_B_SPEED = 85
+
 LOW_E_SPEED = 15
 
 test_runs = input("Was this test done with Split Runs? Type 'y' for YES, Type 'n' for NO:  \n").lower()
 coast_down_processor_on = True
 test_type = input("For WLTP test press 'w', for NEDC press 'n': \n").lower()
+overlap_runs = input("For three overlaps press '3', for a single overlap press '1':  \n").lower()
+
 if test_type == 'w':
     HIGH_B_SPEED = 135
 else:
     HIGH_B_SPEED = 125
+
+if overlap_runs == "3":
+    LOW_B_SPEED = 85
+    overlaps = True
+else:
+    LOW_B_SPEED = 65
+    overlaps = False
 
 while coast_down_processor_on:
 
@@ -56,7 +63,6 @@ while coast_down_processor_on:
         all_runs_indices = filtered_h_pair_indices
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
 
-
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -68,7 +74,6 @@ while coast_down_processor_on:
         coast_weather_times_int = cd.time_to_integers(weather_times_str)
         c_weather_ind = cd.weather_during_coast_full(list_of_weather_t=coast_weather_times_int,
                                                      list_of_time_stamps=coast_times)
-
         final_list = weather.final_output(c_weather_ind)
         weather.pressure_conv()
         kpa_metric_pressure = weather.pressure_output()
@@ -77,17 +82,17 @@ while coast_down_processor_on:
         new_df = pd.DataFrame(new_pressure_column)
 
         df = pd.DataFrame(final_list)
+
         df.update(new_df)
         df.to_csv("weather_during_coast.csv")
-
         results = Results()
         if test_type == 'w':
             results.high_run_pull(test_type=True)
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume()
-            results.mid_ave_accume()
+            results.top_vel_accume(overlays=overlaps)
+            results.mid_ave_accume(overlays=overlaps)
             results.low_vel_accume()
             results.add_leg_stamps(coast_times_str)
             results.w_run_analysis()
@@ -99,8 +104,8 @@ while coast_down_processor_on:
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume()
-            results.mid_ave_accume()
+            results.top_vel_accume(overlays=overlaps)
+            results.mid_ave_accume(overlays=overlaps)
             results.low_vel_accume()
             results.add_leg_stamps(coast_times_str)
             results.w_run_analysis()
@@ -191,7 +196,6 @@ wc.two_ave()
 wc.five_ave()
 wc.cross_w()
 failure = wc.pass_fail()
-
 
 if failure != []:
     df = pd.DataFrame(failure)
