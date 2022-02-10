@@ -1,5 +1,5 @@
 import pandas as pd
-import cd_functions as cd
+import statistics as st
 
 pair_number = range(1, 12)
 pair_letter = ('a', 'b')
@@ -92,13 +92,17 @@ class Results:
             self.p_values_out.append(new_blank)
         return self.p_values_out
 
-    def top_vel_accume(self):
+    def top_vel_accume(self, overlays):
         i = 0
+        if overlays:
+            z = 5
+        else:
+            z = 7
         while i < self.loop_count * 2:
             self.p_values_out[i].append(0)
             total = 0
             k = 0
-            while k < 5:
+            while k < z:
                 self.high_sum = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
                 total += round(self.high_sum, 3)
                 self.p_values_out[i].append(total)
@@ -115,17 +119,22 @@ class Results:
             i += 1
         return self.overlap_values
 
-    def mid_ave_accume(self):
+    def mid_ave_accume(self, overlays):
         i = 0
         self.transition_value()
         while i < self.loop_count * 2:
-            k = 5
-            j = 0
+            if overlays:
+                k = 5
+                j = 0
+            else:
+                k = 7
+                j = 2
             total = self.overlap_values[i]
             while k < 8:
                 h_v = self.data.iloc[self.high_index[i]][self.high_dict["high"][k]]
                 l_v = self.data.iloc[self.low_index[i]][self.low_dict["low"][j]]
-                overlap_average = (h_v + l_v) / 2
+                data_tup = (h_v, l_v)
+                overlap_average = st.harmonic_mean(data_tup)
                 total += round(overlap_average, 3)
                 self.p_values_out[i].append(total)
 
@@ -179,6 +188,7 @@ class Results:
 
     def add_leg_stamps(self, time_list):
         self.separator()
+
         j = 0
         new_list = []
         while j < len(time_list):
@@ -246,9 +256,7 @@ class Results:
                 self.p_values_out[i].append(total)
                 k += 1
             i += 1
-
         self.separator()
-
         i = 0
         while i < self.loop_count * 2:
             self.p_values_out[i].append(0)
