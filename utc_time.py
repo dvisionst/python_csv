@@ -15,6 +15,7 @@ class UtcTime:
         for num_time in self.round_t:
             self.string_t.append(str(num_time))
 
+
     def az_time_list(self):
         i = 0
         while i < len(self.string_t):
@@ -35,6 +36,7 @@ class UtcTime:
                     new_az_e = str(conv_hour_e) + self.string_t[i][1::]
                     self.az_times.append(new_az_e)
             i += 1
+
 
 
 
