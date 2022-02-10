@@ -21,6 +21,7 @@ class Weather:
 
     def final_output(self, index_list):
         i = 0
+
         while i < len(index_list):
             x = self.one_sec_data.iloc[index_list[i]]
             self.final_list.append(x)
