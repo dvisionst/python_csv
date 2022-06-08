@@ -1,7 +1,11 @@
+# This module is used to obtain the timestamps for the weather during the actual coasting of the vehicle.
+
+
 STRING_NUMBERS = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
 
 def formatting_t(some_list):
+    # This function removes all of the colons ":" from the weather timestamps, and returns the concatenated digits.
     new_list = []
     i = 1
     while i <= len(some_list):
@@ -11,7 +15,6 @@ def formatting_t(some_list):
             if some_list[i][j] in STRING_NUMBERS:
                 new_string += some_list[i][j]
             j += 1
-
         new_list.append(new_string)
         i += 1
     return new_list
@@ -35,6 +38,7 @@ def weather_during_coast_full(list_of_weather_t, list_of_time_stamps):
     stopping = len(list_of_time_stamps) - 1
     ending = len(list_of_weather_t) - 1
     index_list = []
+
     while i <= ending:
         k = 0
         j = 1
@@ -50,7 +54,7 @@ def weather_during_coast_full(list_of_weather_t, list_of_time_stamps):
             m = 2
             while n < stopping:
                 if list_of_weather_t[i] == list_of_weather_t[-1]:
-                    print(list_of_weather_t[i], True)
+                    # print(list_of_weather_t[i], True)
                     break
                 elif list_of_time_stamps[m] <= list_of_weather_t[i] <= list_of_time_stamps[p]:
                     i += 1
@@ -62,9 +66,3 @@ def weather_during_coast_full(list_of_weather_t, list_of_time_stamps):
                     n += 2
         i += 1
     return index_list
-
-
-
-
-
-
