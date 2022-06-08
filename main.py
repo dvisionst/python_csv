@@ -1,3 +1,12 @@
+# The goal of this program is to process coastdown data and weather data jointly for any coastdown test.
+# It takes 4 csv data files, 2 of which are weather data files. The other 2 are data files from the VBOX used
+# during the test. This program outputs up to 3 files. One file is the one second weather data for only the times in
+# which the vehicle is coasting. The other file is has the cumulative times of the speed gates, the
+# timestamps, and just the speed gates. The third file may or may not be an output, it depends on if the test passed
+# the weather requirements. If the test fails, the file is outputted with the parameter that failed along with the
+# timestamps where the failure occurred.
+# This program can process single or split runs, and WLTP or NEDC speed conditions.
+
 from vbox import Vbox
 from utc_time import UtcTime
 from weather import Weather
@@ -7,62 +16,37 @@ import cd_functions as cd
 import pandas as pd
 
 
-def pair_list_filter(v_obj, asc_list_indexes):
-    speed_pairs_f_list = []
-    odd_even_check = 0
-    i = 0
-    while i < len(asc_list_indexes):
-        if odd_even_check % 2 == 0 and v_obj.data.iloc[asc_list_indexes[i]].velocity > 60:
-            speed_pairs_f_list.append(asc_list_indexes[i])
-            odd_even_check = 1
-        elif odd_even_check % 2 == 1 and v_obj.data.iloc[asc_list_indexes[i]].velocity < 60:
-            speed_pairs_f_list.append(asc_list_indexes[i])
-            odd_even_check = 0
-        i += 1
-    return speed_pairs_f_list
-
-
 HIGH_E_SPEED = 55
-
+LOW_B_SPEED = 65
 LOW_E_SPEED = 15
 
 test_runs = input("Was this test done with Split Runs? Type 'y' for YES, Type 'n' for NO:  \n").lower()
 coast_down_processor_on = True
 test_type = input("For WLTP test press 'w', for NEDC press 'n': \n").lower()
-overlap_runs = input("For three overlaps press '3', for a single overlap press '1':  \n").lower()
+
+# if test_runs == "y":
+#     overlap_runs = input("For three overlaps press '3', for a single overlap press '1':  \n").lower()
+#     if overlap_runs == "3":
+#
+#         overlaps = True
+#     else:
+#         LOW_B_SPEED = 65
+#         overlaps = False
 
 if test_type == 'w':
     HIGH_B_SPEED = 135
 else:
     HIGH_B_SPEED = 125
 
-if overlap_runs == "3":
-    LOW_B_SPEED = 85
-    overlaps = True
-else:
-    LOW_B_SPEED = 65
-    overlaps = False
-
 while coast_down_processor_on:
 
     if test_runs == "y":
+        # This next block of code creates uses two list of indices one of the high start velocities and one of the
+        # low stop velocities. Using these two lists, they are arranged and a new list of timestamps is created.
         vbox_high = Vbox()
-        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=HIGH_B_SPEED)
-        h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=HIGH_E_SPEED)
-        sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
-        filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
-
-        vbox_low = Vbox()
-        l_pair_start_array = vbox_low.start_trig_times(high_end_speed=LOW_B_SPEED)
-        l_pair_end_array = vbox_low.stop_trig_times(low_end_speed=LOW_E_SPEED)
-        sorted_low_list = cd.total_index_sort(start_list=l_pair_start_array, stop_list=l_pair_end_array)
-        filtered_l_pair_indices = pair_list_filter(vbox_low, sorted_low_list)
-
-        filtered_h_pair_indices.extend(filtered_l_pair_indices)
-        filtered_h_pair_indices.sort()
-        all_runs_indices = filtered_h_pair_indices
+        all_runs_indices = vbox_high.mod_times(high_leg_begin=HIGH_B_SPEED, high_leg_end=HIGH_E_SPEED,
+                                               low_leg_begin=LOW_B_SPEED, low_leg_end=LOW_E_SPEED)
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
-
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -72,6 +56,7 @@ while coast_down_processor_on:
         weather = Weather()
         weather_times_str = cd.formatting_t(weather.time_data)
         coast_weather_times_int = cd.time_to_integers(weather_times_str)
+
         c_weather_ind = cd.weather_during_coast_full(list_of_weather_t=coast_weather_times_int,
                                                      list_of_time_stamps=coast_times)
         final_list = weather.final_output(c_weather_ind)
@@ -80,51 +65,47 @@ while coast_down_processor_on:
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
-
         df = pd.DataFrame(final_list)
-
         df.update(new_df)
-        df.to_csv("weather_during_coast.csv")
+        df.to_csv("weather_during_coast_OUT.csv")
         results = Results()
         if test_type == 'w':
             results.high_run_pull(test_type=True)
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume(overlays=overlaps)
-            results.mid_ave_accume(overlays=overlaps)
+            results.top_vel_accume()
+            results.mid_ave_accume()
             results.low_vel_accume()
             results.add_leg_stamps(coast_times_str)
             results.w_run_analysis()
+            results.accuracy_percentage()
+            results.second_loop(weather.current_string_stamps, test_type=test_runs)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
-            df.to_csv("cumulative_times_results.csv")
+            df.to_csv("cumulative_times_results_OUT.csv")
         elif test_type != "w":
             results.high_run_pull(test_type=False)
             results.low_run_pull()
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_accume(overlays=overlaps)
-            results.mid_ave_accume(overlays=overlaps)
+            results.top_vel_accume()
+            results.mid_ave_accume()
             results.low_vel_accume()
             results.add_leg_stamps(coast_times_str)
             results.w_run_analysis()
+            results.accuracy_percentage()
+            results.second_loop(weather.current_string_stamps, test_type=test_type)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
-            df.to_csv("cumulative_times_results.csv")
+            df.to_csv("cumulative_times_results_OUT.csv")
 
         coast_down_processor_on = False
 
     elif test_runs == "n":
         vbox_high = Vbox()
-        h_pair_start_array = vbox_high.start_trig_times(high_end_speed=HIGH_B_SPEED)
-        h_pair_stop_array = vbox_high.stop_trig_times(low_end_speed=LOW_E_SPEED)
-        sorted_high_list = cd.total_index_sort(start_list=h_pair_start_array, stop_list=h_pair_stop_array)
-        filtered_h_pair_indices = pair_list_filter(vbox_high, sorted_high_list)
-
-        all_runs_indices = filtered_h_pair_indices
+        all_runs_indices = vbox_high.mod_times_single(starting_velocity=HIGH_B_SPEED, ending_velocity=LOW_E_SPEED)
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
-
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -136,38 +117,41 @@ while coast_down_processor_on:
         coast_weather_times_int = cd.time_to_integers(weather_times_str)
         c_weather_ind = cd.weather_during_coast_full(list_of_weather_t=coast_weather_times_int,
                                                      list_of_time_stamps=coast_times)
-
         final_list = weather.final_output(c_weather_ind)
         weather.pressure_conv()
         kpa_metric_pressure = weather.pressure_output()
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
-
         df = pd.DataFrame(final_list)
         df.update(new_df)
-        df.to_csv("weather_during_coast.csv")
+        df.to_csv("weather_during_coast_OUT.csv")
 
         results = Results()
         if test_type == 'w':
             results.high_run_pull(test_type=True)
             results.loop_index()
             results.output_pairs_list()
-            results.top_vel_single(test_type=True)
-            results.add_leg_stamps(coast_times_str)
+            results.top_vel_single()
+            results.add_leg_stamps_single(coast_times_str)
+            results.w_run_analysis_s()
+            results.accuracy_percentage()
+            results.second_loop(weather.current_string_stamps, test_type=test_type)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
-            df.to_csv("cumulative_times_results.csv")
+            df.to_csv("cumulative_times_results_OUT.csv")
         elif test_type != "w":
             results.high_run_pull(test_type=False)
             results.loop_index()
             results.output_pairs_list()
             results.top_vel_single(test_type=False)
-            results.add_leg_stamps(coast_times_str)
+            results.add_leg_stamps_single(coast_times_str)
+            results.w_run_analysis_s()
+            results.accuracy_percentage()
+            results.second_loop(weather.current_string_stamps, test_type=test_type)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
-            df.to_csv("cumulative_times_results.csv")
-
+            df.to_csv("cumulative_times_results_OUT.csv")
         coast_down_processor_on = False
 
     else:
@@ -186,9 +170,9 @@ track_weather = weather.new_straight_column()
 
 new_straightaway_column = {"STRAIGHT": track_weather}
 t_df = pd.DataFrame(new_straightaway_column)
-data1 = pd.read_csv("weather_during_coast.csv")
+data1 = pd.read_csv("weather_during_coast_OUT.csv")
 data1.insert(loc=11, column="Straightaway", value=track_weather)
-data1.to_csv("weather_during_coast.csv")
+data1.to_csv("weather_during_coast_OUT.csv")
 
 wc = Wcheck()
 wc.wind()
@@ -199,7 +183,7 @@ failure = wc.pass_fail()
 
 if failure != []:
     df = pd.DataFrame(failure)
-    df.to_csv("weather_failures.csv")
+    df.to_csv("weather_failures_OUT.csv")
     print("The Coastdown test fails due to weather, for more information open up 'weather_failures.csv' file.")
 
 print("The program has completed, you can now view the results in two csv files\n")
