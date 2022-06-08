@@ -4,9 +4,9 @@ import pandas as pd
 class Weather:
 
     def __init__(self):
-        self.one_sec_data = pd.read_csv("one_weather.csv")
-        self.track_data = pd.read_csv("track_weather.csv")
-        self.coast_f_data = pd.read_csv("weather_during_coast.csv")
+        self.one_sec_data = pd.read_csv("one_weather_IN.csv")
+        self.track_data = pd.read_csv("track_weather_IN.csv")
+        self.coast_f_data = pd.read_csv("weather_during_coast_OUT.csv")
         self.time_data = self.one_sec_data.Time[1::]
         self.m_bar = self.one_sec_data.BAROM[1::]
         self.one_s_data = ""
@@ -18,13 +18,16 @@ class Weather:
         self.c_weather = []
         self.f_straight_list = []
         self.new_column_straight = []
+        self.current_string_stamps = []
 
     def final_output(self, index_list):
         i = 0
-
+        # print()
+        # print(type(self.one_sec_data.iloc[index_list[1]]["Time"]))
         while i < len(index_list):
             x = self.one_sec_data.iloc[index_list[i]]
             self.final_list.append(x)
+            self.current_string_stamps.append(self.one_sec_data.iloc[index_list[i]]["Time"])
             i += 1
 
         return self.final_list
