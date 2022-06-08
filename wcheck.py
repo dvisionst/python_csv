@@ -5,7 +5,7 @@ import math
 class Wcheck:
 
     def __init__(self):
-        self.data = pd.read_csv("weather_during_coast.csv")
+        self.data = pd.read_csv("weather_during_coast_OUT.csv")
         self.five_r_ave = [0, 0, 0, 0]
         self.two_r_ave = [0]
         self.cross_wind = [0, 0, 0, 0]
@@ -105,9 +105,18 @@ class Wcheck:
         ending_temp = max(self.temp)
         temp_difference = abs(ending_temp - starting_temp)
         if temp_difference > 5:
-            temp_difference_fail = "temperature failure due to difference more than 5 degrees"
+            temp_difference_fail = {"temperature failure due to difference more than 5 degrees": [temp_difference]}
             self.fail.append(temp_difference_fail)
             good_weather += 1
+        elif ending_temp > 40:
+            max_temp_fail = {"temperature failure due to being over limit": [ending_temp]}
+            self.fail.append(max_temp_fail)
+            good_weather += 1
+        elif starting_temp < 5:
+            min_temp_fail = {"temperature failure due to being below limit": [starting_temp]}
+            self.fail.append(min_temp_fail)
+            good_weather += 1
+
 
         if cross_wind_fail == []:
             good_weather += 0
@@ -121,11 +130,3 @@ class Wcheck:
             self.fail = []
 
         return self.fail
-
-
-
-
-
-
-
-
