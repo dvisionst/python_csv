@@ -382,21 +382,18 @@ class Results:
     def corrected_time_s(self, weather_list):
         self.separator()
         i = 0
-        new = []
+
         while i < len(self.pair_stamp_a):
             if self.pair_stamp_a[i] in weather_list:
-                new.append(self.pair_stamp_a[i])
+                self.c_leg_a.append(self.pair_stamp_a[i])
                 i += 1
             else:
                 if i % 2 == 0:
-                    new.append(self.begining_time(self.pair_stamp_a[i]))
+                    self.c_leg_a.append(self.begining_time(self.pair_stamp_a[i]))
                     i += 1
                 else:
-                    new.append(self.ending_time(self.pair_stamp_a[i]))
+                    self.c_leg_a.append(self.ending_time(self.pair_stamp_a[i]))
                     i += 1
-
-        self.pair_stamp_a.clear()
-        self.single_stamp(new)
 
     def corrected_time_m(self, weather_list):
         self.separator()
