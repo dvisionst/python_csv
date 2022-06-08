@@ -95,13 +95,11 @@ while coast_down_processor_on:
             results.add_leg_stamps(coast_times_str)
             results.w_run_analysis()
             results.accuracy_percentage()
-            results.second_loop(weather.current_string_stamps, test_type=test_type)
+            results.second_loop(weather.current_string_stamps, test_type=test_runs)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
             df.to_csv("cumulative_times_results_OUT.csv")
-
         coast_down_processor_on = False
-
     elif test_runs == "n":
         vbox_high = Vbox()
         all_runs_indices = vbox_high.mod_times_single(starting_velocity=HIGH_B_SPEED, ending_velocity=LOW_E_SPEED)
@@ -126,7 +124,6 @@ while coast_down_processor_on:
         df = pd.DataFrame(final_list)
         df.update(new_df)
         df.to_csv("weather_during_coast_OUT.csv")
-
         results = Results()
         if test_type == 'w':
             results.high_run_pull(test_type=True)
@@ -135,8 +132,7 @@ while coast_down_processor_on:
             results.top_vel_single()
             results.add_leg_stamps_single(coast_times_str)
             results.w_run_analysis_s()
-            results.accuracy_percentage()
-            results.second_loop(weather.current_string_stamps, test_type=test_type)
+            results.second_loop(weather.current_string_stamps, test_type=test_runs)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
             df.to_csv("cumulative_times_results_OUT.csv")
@@ -147,8 +143,7 @@ while coast_down_processor_on:
             results.top_vel_single(test_type=False)
             results.add_leg_stamps_single(coast_times_str)
             results.w_run_analysis_s()
-            results.accuracy_percentage()
-            results.second_loop(weather.current_string_stamps, test_type=test_type)
+            results.second_loop(weather.current_string_stamps, test_type=test_runs)
             results.final_dataframe()
             df = pd.DataFrame(results.columns)
             df.to_csv("cumulative_times_results_OUT.csv")
@@ -188,3 +183,4 @@ if failure != []:
 
 print("The program has completed, you can now view the results in two csv files\n")
 print("Those files are: 'weather_during_coast' & 'cumulative_times_results'\n")
+
