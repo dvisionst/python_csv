@@ -12,27 +12,80 @@ from utc_time import UtcTime
 from weather import Weather
 from results import Results
 from wcheck import Wcheck
+from tkinter import *
+from tkinter import messagebox
 import cd_functions as cd
 import pandas as pd
-
 
 HIGH_E_SPEED = 55
 LOW_B_SPEED = 65
 LOW_E_SPEED = 15
+choice = ""
+procedure = ""
+test_runs = ""
+test_type = ""
 
-test_runs = input("Was this test done with Split Runs? Type 'y' for YES, Type 'n' for NO:  \n").lower()
+
+def test_procedures():
+    global procedure, test_type
+    val = group_1.get()
+    if val == 1:
+        procedure = "WLTP"
+        test_type = 'w'
+    elif val == 2:
+        procedure = "NEDC"
+        test_type = 'n'
+    return procedure
+
+
+def run_type():
+    global choice, test_runs
+    val = group_2.get()
+    if val == 1:
+        choice = "Splits"
+        test_runs = 'y'
+    elif val == 2:
+        choice = "Singles"
+        test_runs = 'n'
+    return choice
+
+
+def message():
+    result = messagebox.askyesno("Confirmation", f"You selected {test_procedures()} and {run_type()}")
+    if result:
+        window.destroy()
+
+
+window = Tk()
+window.title("APG Coastdown Processor")
+window.config(bg='#47B5FF')
+window.geometry('500x450')
+
+canvas = Canvas(width=350, height=300, highlightthickness=0, bg='#47B5FF')
+logo = PhotoImage(file="Capture.PNG")
+canvas.create_image(200, 100, image=logo)
+canvas.place(x=50, y=0)
+canvas.create_text(200, 275, text="Please Select Test Parameters:", font=("Ariel", 15, "italic"))
+
+frame1 = LabelFrame(window, text='Test Procedure', font=("Rockwell", 10, "bold"))
+frame1.place(x=140, y=325)
+
+frame2 = LabelFrame(window, text='Run Type', font=("Rockwell", 10, "bold"))
+frame2.place(x=265, y=325)
+
+confirm_button = Button(text="Confirm", width=20, command=message)
+confirm_button.place(x=170, y=400)
+
+group_1 = IntVar()
+group_2 = IntVar()
+Radiobutton(frame1, text='WLTP', variable=group_1, value=1).pack()
+Radiobutton(frame1, text='NEDC', variable=group_1, value=2).pack()
+Radiobutton(frame2, text='Split Runs', variable=group_2, value=1).pack()
+Radiobutton(frame2, text='Single Runs', variable=group_2, value=2).pack()
+
+window.mainloop()
+
 coast_down_processor_on = True
-test_type = input("For WLTP test press 'w', for NEDC press 'n': \n").lower()
-
-# if test_runs == "y":
-#     overlap_runs = input("For three overlaps press '3', for a single overlap press '1':  \n").lower()
-#     if overlap_runs == "3":
-#
-#         overlaps = True
-#     else:
-#         LOW_B_SPEED = 65
-#         overlaps = False
-
 if test_type == 'w':
     HIGH_B_SPEED = 135
 else:
@@ -41,12 +94,11 @@ else:
 while coast_down_processor_on:
 
     if test_runs == "y":
-        # This next block of code creates uses two list of indices one of the high start velocities and one of the
-        # low stop velocities. Using these two lists, they are arranged and a new list of timestamps is created.
         vbox_high = Vbox()
         all_runs_indices = vbox_high.mod_times(high_leg_begin=HIGH_B_SPEED, high_leg_end=HIGH_E_SPEED,
                                                low_leg_begin=LOW_B_SPEED, low_leg_end=LOW_E_SPEED)
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
+
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -56,12 +108,10 @@ while coast_down_processor_on:
         weather = Weather()
         weather_times_str = cd.formatting_t(weather.time_data)
         coast_weather_times_int = cd.time_to_integers(weather_times_str)
-
         c_weather_ind = cd.weather_during_coast_full(list_of_weather_t=coast_weather_times_int,
                                                      list_of_time_stamps=coast_times)
         final_list = weather.final_output(c_weather_ind)
-        weather.pressure_conv()
-        kpa_metric_pressure = weather.pressure_output()
+        kpa_metric_pressure = weather.pressure_conv()
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
@@ -104,6 +154,7 @@ while coast_down_processor_on:
         vbox_high = Vbox()
         all_runs_indices = vbox_high.mod_times_single(starting_velocity=HIGH_B_SPEED, ending_velocity=LOW_E_SPEED)
         time_stamps_raw = vbox_high.time_stamp(all_runs_indices)
+
         utc = UtcTime()
         utc.utc_type_conv(time_stamps_raw)
         utc.az_time_list()
@@ -116,8 +167,7 @@ while coast_down_processor_on:
         c_weather_ind = cd.weather_during_coast_full(list_of_weather_t=coast_weather_times_int,
                                                      list_of_time_stamps=coast_times)
         final_list = weather.final_output(c_weather_ind)
-        weather.pressure_conv()
-        kpa_metric_pressure = weather.pressure_output()
+        kpa_metric_pressure = weather.pressure_conv()
         kpa_metric_pressure.insert(0, "kPa")
         new_pressure_column = {"BAROM": kpa_metric_pressure}
         new_df = pd.DataFrame(new_pressure_column)
@@ -148,7 +198,6 @@ while coast_down_processor_on:
             df = pd.DataFrame(results.columns)
             df.to_csv("cumulative_times_results_OUT.csv")
         coast_down_processor_on = False
-
     else:
         re_start = input("That was an invalid input, pres 'y' to try again.\n").lower()
         if re_start == 'y':
@@ -183,4 +232,3 @@ if failure != []:
 
 print("The program has completed, you can now view the results in two csv files\n")
 print("Those files are: 'weather_during_coast' & 'cumulative_times_results'\n")
-
